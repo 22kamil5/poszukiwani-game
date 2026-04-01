@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 150" fill="#555">
+  <rect width="120" height="150" fill="#2a2a4a"/>
+  <circle cx="60" cy="50" r="25" fill="#555"/>
+  <ellipse cx="60" cy="130" rx="40" ry="35" fill="#555"/>
+  <text x="60" y="145" text-anchor="middle" fill="#888" font-size="10">Brak zdjęcia</text>
+</svg>

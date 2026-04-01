@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Poszukiwani - Zgadnij za co</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="screen-start" class="screen active">
+        <h1>Poszukiwani</h1>
+        <p>Zgadnij za co poszukiwana jest dana osoba. Postaw pinezkę na mapie przestępstw — im bliżej, tym więcej punktów!</p>
+        <p class="rules">5 rund &bull; 3 próby na rundę &bull; max 5000 pkt</p>
+        <button id="btn-play">Graj</button>
+    </div>
+
+    <div id="screen-round" class="screen">
+        <div class="round-header">
+            <span id="round-counter">Runda 1/5</span>
+            <span id="attempt-counter">Próba 1/3</span>
+            <span id="round-score">0 pkt</span>
+        </div>
+        <div class="round-content">
+            <div class="person-panel">
+                <img id="person-photo" src="" alt="Zdjęcie poszukiwanego">
+                <div class="person-info">
+                    <p id="person-name"></p>
+                    <p id="person-age"></p>
+                    <p id="person-gender"></p>
+                    <p id="person-region"></p>
+                </div>
+            </div>
+            <div id="map-container"></div>
+        </div>
+        <div id="feedback" class="feedback hidden"></div>
+        <button id="btn-next" class="hidden">Następna runda</button>
+    </div>
+
+    <div id="screen-end" class="screen">
+        <h2>Wynik</h2>
+        <p id="total-score"></p>
+        <div id="round-summary"></div>
+        <button id="btn-share">Udostępnij wynik</button>
+        <p id="share-confirm" class="hidden">Skopiowano!</p>
+        <button id="btn-replay" disabled title="Nowa gra dostępna jutro">Zagraj ponownie</button>
+    </div>
+
+    <div id="screen-error" class="screen">
+        <h2>Błąd</h2>
+        <p>Nie udało się załadować danych. Spróbuj odświeżyć stronę.</p>
+        <p id="error-details" style="color:#888;font-size:0.8rem;"></p>
+    </div>
+
+    <script src="js/scoring.js"></script>
+    <script src="js/daily.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/share.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
