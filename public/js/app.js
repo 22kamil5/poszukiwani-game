@@ -4,7 +4,7 @@ class Game {
         this.dateString = dailyData.dateString;
         this.persons = dailyData.persons;
         this.currentRound = 0;
-        this.maxAttempts = 3;
+        this.maxAttempts = 1;
         this.currentAttempt = 0;
         this.roundScores = [];
         this.bestScoreThisRound = 0;

@@ -1,12 +1,24 @@
 const CLUSTERS = [
-    { id: 'przeciwko_zyciu', label: 'Przeciwko życiu', x: 0.15, y: 0.90, color: '#e53935' },
-    { id: 'przemoc', label: 'Przemoc / Rozbój', x: 0.15, y: 0.53, color: '#fb8c00' },
-    { id: 'seksualne', label: 'Przestępstwa\nseksualne', x: 0.10, y: 0.70, color: '#ab47bc' },
-    { id: 'narkotyki', label: 'Narkotyki', x: 0.45, y: 0.75, color: '#43a047' },
-    { id: 'przeciwko_panstwu', label: 'Przeciwko\npaństwu', x: 0.50, y: 0.55, color: '#5c6bc0' },
-    { id: 'oszustwa', label: 'Oszustwa', x: 0.80, y: 0.72, color: '#fdd835' },
-    { id: 'skarbowe', label: 'Skarbowe', x: 0.85, y: 0.45, color: '#78909c' },
-    { id: 'kradzieze', label: 'Kradzieże /\nWłamanie', x: 0.73, y: 0.25, color: '#26a69a' }
+    { id: 'przeciwko_zyciu', label: 'Zabójstwo', x: 0.08, y: 0.93, color: '#e53935' },
+    { id: 'ciężki_uszczerbek', label: 'Ciężkie\npobicie', x: 0.15, y: 0.82, color: '#ef5350' },
+    { id: 'przemoc', label: 'Przemoc /\nRozbój', x: 0.15, y: 0.55, color: '#fb8c00' },
+    { id: 'groźby', label: 'Groźby /\nStalking', x: 0.22, y: 0.42, color: '#ff9800' },
+    { id: 'znecanie', label: 'Znęcanie\nsię', x: 0.18, y: 0.56, color: '#f57c00' },
+    { id: 'seksualne', label: 'Przestępstwa\nseksualne', x: 0.08, y: 0.70, color: '#ab47bc' },
+    { id: 'narkotyki_handel', label: 'Handel\nnarkotykami', x: 0.42, y: 0.80, color: '#2e7d32' },
+    { id: 'narkotyki_posiadanie', label: 'Posiadanie\nnarkotyków', x: 0.48, y: 0.65, color: '#43a047' },
+    { id: 'grupa_przestepcza', label: 'Grupa\nprzestępcza', x: 0.50, y: 0.68, color: '#3949ab' },
+    { id: 'korupcja', label: 'Korupcja', x: 0.53, y: 0.60, color: '#5c6bc0' },
+    { id: 'przeciwko_panstwu', label: 'Przeciwko\npaństwu', x: 0.43, y: 0.43, color: '#7986cb' },
+    { id: 'oszustwa', label: 'Oszustwo', x: 0.80, y: 0.74, color: '#fdd835' },
+    { id: 'falsszerstwo', label: 'Fałszerstwo\ndokumentów', x: 0.75, y: 0.66, color: '#ffee58' },
+    { id: 'wyludzenie', label: 'Wyłudzenie\nkredytu', x: 0.85, y: 0.68, color: '#fbc02d' },
+    { id: 'pranie', label: 'Pranie\npieniędzy', x: 0.82, y: 0.76, color: '#f9a825' },
+    { id: 'skarbowe', label: 'Skarbowe /\nPodatkowe', x: 0.87, y: 0.45, color: '#78909c' },
+    { id: 'kradziez', label: 'Kradzież', x: 0.72, y: 0.20, color: '#26a69a' },
+    { id: 'wlamanie', label: 'Włamanie', x: 0.68, y: 0.30, color: '#00897b' },
+    { id: 'paserstwo', label: 'Paserstwo', x: 0.76, y: 0.32, color: '#009688' },
+    { id: 'zniszczenie', label: 'Zniszczenie\nmienia', x: 0.65, y: 0.18, color: '#4db6ac' }
 ];
 
 class CrimeMap {
@@ -44,14 +56,14 @@ class CrimeMap {
             const cx = c.x * 600;
             const cy = (1 - c.y) * 450;
             const circle = this._el('circle', {
-                cx: cx, cy: cy, r: 45,
-                fill: c.color, opacity: 0.12
+                cx: cx, cy: cy, r: 32,
+                fill: c.color, opacity: 0.15
             });
             svg.appendChild(circle);
 
             const lines = c.label.split('\n');
             lines.forEach((line, i) => {
-                this._addText(cx, cy + (i - (lines.length - 1) / 2) * 13, line, 11, c.color + 'cc');
+                this._addText(cx, cy + (i - (lines.length - 1) / 2) * 11, line, 9, c.color + 'cc');
             });
         });
 

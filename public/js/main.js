@@ -7,7 +7,10 @@
             return res.json();
         })
         .then(function (allPersons) {
-            const daily = getDailyPersons(allPersons, today);
+            var withPhotos = allPersons.filter(function (p) {
+                return p.photo && !p.photo.includes('placeholder');
+            });
+            const daily = getDailyPersons(withPhotos, today);
             const game = new Game({
                 puzzleNumber: daily.puzzleNumber,
                 dateString: today,
