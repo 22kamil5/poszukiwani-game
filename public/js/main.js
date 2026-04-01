@@ -1,6 +1,4 @@
 (function () {
-    const today = getTodayString();
-
     fetch('data/persons.json')
         .then(function (res) {
             if (!res.ok) throw new Error('Failed to load persons.json');
@@ -10,15 +8,18 @@
             var withPhotos = allPersons.filter(function (p) {
                 return p.photo && !p.photo.includes('placeholder');
             });
-            const daily = getDailyPersons(withPhotos, today);
-            const game = new Game({
-                puzzleNumber: daily.puzzleNumber,
-                dateString: today,
-                persons: daily.persons,
+
+            // Random selection each time (not daily seed)
+            var rng = mulberry32(Date.now());
+            var shuffled = seededShuffle(withPhotos, rng);
+            var picked = shuffled.slice(0, Math.min(5, shuffled.length));
+
+            var game = new Game({
+                puzzleNumber: Math.floor(Math.random() * 999) + 1,
+                dateString: getTodayString(),
+                persons: picked,
                 allPersons: withPhotos
             });
-
-            // No localStorage block — allow replaying
         })
         .catch(function (err) {
             document.getElementById('screen-start').classList.remove('active');

@@ -30,7 +30,6 @@ class Game {
             personPhoto: document.getElementById('person-photo'),
             personName: document.getElementById('person-name'),
             personAge: document.getElementById('person-age'),
-            personGender: document.getElementById('person-gender'),
             personRegion: document.getElementById('person-region'),
             feedback: document.getElementById('feedback'),
             btnNext: document.getElementById('btn-next'),
@@ -86,9 +85,8 @@ class Game {
             this.els.personPhoto.src = 'assets/placeholder.svg';
         };
         this.els.personName.textContent = person.name;
-        this.els.personAge.innerHTML = '<span class="label">Wiek:</span> <span class="value">' + (person.age || '?') + '</span>';
-        this.els.personGender.innerHTML = '<span class="label">Płeć:</span> <span class="value">' + (person.gender === 'M' ? 'Mężczyzna' : 'Kobieta') + '</span>';
-        this.els.personRegion.innerHTML = '<span class="label">Region:</span> <span class="value">' + person.region + '</span>';
+        this.els.personAge.textContent = (person.age ? person.age + ' lat' : '') + (person.gender === 'M' ? ' · mężczyzna' : person.gender === 'K' ? ' · kobieta' : '');
+        this.els.personRegion.textContent = person.region || '';
 
         this.els.feedback.classList.add('hidden');
         this.els.feedback.className = 'feedback hidden';
