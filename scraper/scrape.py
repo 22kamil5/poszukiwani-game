@@ -79,7 +79,11 @@ def discover_person_links(limit=34):
 
 
 def parse_person_page(url):
-    """Parse a single person profile page."""
+    """Parse a single person profile page.
+
+    HTML structure: data is in <p> tags with <strong> children
+    inside section.grid .col-md-8. No tables.
+    """
     resp = fetch_page(BASE_URL + url if url.startswith("/") else url)
     if not resp:
         return None
@@ -94,47 +98,64 @@ def parse_person_page(url):
         return None
     person["id"] = id_match.group(1)
 
-    # Name extraction
-    name_el = soup.select_one("h1, .dane-osobowe h2, .tytul")
-    if name_el:
-        full_name = name_el.get_text(strip=True)
-        parts = full_name.split()
-        if len(parts) >= 2:
-            person["name"] = parts[1] + " " + parts[0][0] + "."
-        elif parts:
-            person["name"] = parts[0]
+    # Name: find h2 with an all-caps person name (SURNAME FIRSTNAME)
+    for h2 in soup.find_all("h2"):
+        h2_text = h2.get_text(strip=True)
+        # Person name h2s are all-caps with at least 2 words
+        if h2_text and h2_text == h2_text.upper() and len(h2_text.split()) >= 2:
+            parts = h2_text.split()
+            # Format: SURNAME FIRSTNAME -> Firstname S.
+            person["name"] = parts[1].capitalize() + " " + parts[0][0].upper() + "."
+            break
 
-    # Photo URL
+    # Photo
     photo_el = soup.select_one("img[src*='/dokumenty/form/']")
-    if photo_el:
-        person["photo_url"] = BASE_URL + photo_el["src"] if photo_el["src"].startswith("/") else photo_el["src"]
+    if photo_el and photo_el.get("src"):
+        src = photo_el["src"]
+        person["photo_url"] = BASE_URL + src if src.startswith("/") else src
 
-    # Parse data table rows for age, gender, region, article
-    for row in soup.select("tr, .dana"):
-        text = row.get_text(" ", strip=True).lower()
-        full_text = row.get_text(" ", strip=True)
+    # Parse all <p> tags on the page for personal info
+    for p_tag in soup.find_all("p"):
+        text = p_tag.get_text(" ", strip=True)
+        text_lower = text.lower()
 
-        if "data urodzenia" in text:
-            date_match = re.search(r"(\d{4})-(\d{2})-(\d{2})", full_text)
+        # Date of birth: "Data urodzenia: 1975-08-24"
+        if text_lower.startswith("data urodzenia"):
+            date_match = re.search(r"(\d{4})-(\d{2})-(\d{2})", text)
             if date_match:
                 birth_year = int(date_match.group(1))
                 person["age"] = 2026 - birth_year
 
-        if "płeć" in text or "plec" in text:
-            if "mężczyzna" in text or "mezczyzna" in text:
+        # Gender: "Płeć: mężczyzna"
+        if "eć:" in text or "lec:" in text_lower:
+            val = text_lower
+            if "mężczyzna" in val or "mezczyzna" in val:
                 person["gender"] = "M"
-            elif "kobieta" in text:
+            elif "kobieta" in val:
                 person["gender"] = "K"
 
-        if "jednostka" in text or "kwp" in text.lower() or "ksp" in text.lower():
-            region_match = re.search(r"(KWP|KSP)\s+\w+", full_text)
-            if region_match:
-                person["region"] = region_match.group(0)
+        # Region: "Poszukujące jednostki policji:"
+        if "ce jednostki policji" in text_lower:
+            ul = p_tag.find_next_sibling("ul")
+            if ul:
+                for li in ul.find_all("li"):
+                    li_text = li.get_text(strip=True)
+                    region_match = re.search(r"(KWP|KSP)\s+\w+", li_text)
+                    if region_match:
+                        person["region"] = region_match.group(0)
+                        break
 
-        if "art." in text or "art " in text:
-            article_match = re.search(r"(Art\.\s*\d+[^,\n]*)", full_text)
-            if article_match:
-                person["article_raw"] = article_match.group(1).strip()
+        # Crime articles: "Podstawy poszukiwań:"
+        if "podstawy poszukiwa" in text_lower:
+            ul = p_tag.find_next_sibling("ul")
+            if ul:
+                for li in ul.find_all("li"):
+                    article_text = li.get_text(strip=True)
+                    # Extract "Art. 286 § 1" from "Art. 286 § 1 Oszustwo - typ podstawowy"
+                    art_match = re.match(r"(Art\.\s*\d+\s*§?\s*\d*)", article_text)
+                    if art_match:
+                        person["article_raw"] = art_match.group(1).strip()
+                        break
 
     return person
 
@@ -159,33 +180,60 @@ def download_photo(person_id, photo_url):
         return "assets/placeholder.svg"
 
 
+def normalize_article(text):
+    """Normalize article string for matching."""
+    text = text.replace("SS", "§")
+    text = re.sub(r"\s+", " ", text).strip()
+    # Remove trailing descriptions after the article number
+    text = re.sub(r"\s+[A-ZĄĆĘŁŃÓŚŹŻ].*$", "", text)
+    return text
+
+
 def match_article(article_raw, taxonomy):
     """Try to match a raw article string to the taxonomy."""
     if not article_raw:
         return None
 
-    # Direct match
-    if article_raw in taxonomy:
-        return article_raw
+    normalized = normalize_article(article_raw)
 
-    # Normalized match (strip extra spaces)
-    normalized = re.sub(r"\s+", " ", article_raw).strip()
+    # Direct match
+    if normalized in taxonomy:
+        return normalized
+
+    # Normalized match against taxonomy keys
     for key in taxonomy:
-        if re.sub(r"\s+", " ", key).strip() == normalized:
+        if normalize_article(key) == normalized:
             return key
 
-    # Partial match (article number only)
+    # Extract article number and paragraph for partial match
     num_match = re.search(r"Art\.\s*(\d+)\s*§?\s*(\d*)", normalized)
     if num_match:
         art_num = num_match.group(1)
         paragraph = num_match.group(2)
+
+        # Try exact article+paragraph match
         for key in taxonomy:
             key_match = re.search(r"Art\.\s*(\d+)\s*§?\s*(\d*)", key)
             if key_match and key_match.group(1) == art_num:
                 if paragraph and key_match.group(2) == paragraph:
                     return key
-                if not paragraph:
-                    return key
+
+        # Fallback: match article number only (take first matching paragraph)
+        for key in taxonomy:
+            key_match = re.search(r"Art\.\s*(\d+)", key)
+            if key_match and key_match.group(1) == art_num:
+                return key
+
+    # Check for narcotics/KKS articles with "ust." pattern
+    ust_match = re.search(r"Art\.\s*(\d+)\s*ust\.\s*(\d+)", normalized)
+    if ust_match:
+        for key in taxonomy:
+            if f"Art. {ust_match.group(1)} ust. {ust_match.group(2)}" in key:
+                return key
+        # Fallback: just article number
+        for key in taxonomy:
+            if f"Art. {ust_match.group(1)} ust." in key:
+                return key
 
     return None
 
