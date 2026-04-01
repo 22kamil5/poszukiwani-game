@@ -39,7 +39,9 @@ class Game {
             totalScore: document.getElementById('total-score'),
             roundSummary: document.getElementById('round-summary'),
             shareConfirm: document.getElementById('share-confirm'),
-            errorDetails: document.getElementById('error-details')
+            errorDetails: document.getElementById('error-details'),
+            runningTotal: document.getElementById('running-total'),
+            statsRow: document.getElementById('stats-row')
         };
     }
 
@@ -52,15 +54,6 @@ class Game {
     showError(message) {
         this.els.errorDetails.textContent = message;
         this._showScreen('error');
-    }
-
-    _updatePills(usedCount) {
-        const pills = this.els.attemptCounter.querySelectorAll('.pill');
-        pills.forEach((pill, i) => {
-            pill.className = 'pill';
-            if (i < usedCount) pill.classList.add('used');
-            else if (i === usedCount) pill.classList.add('active');
-        });
     }
 
     _showScreen(name) {
@@ -82,8 +75,9 @@ class Game {
         this.bestPinIndex = 0;
 
         this.els.roundCounter.textContent = 'Runda ' + (this.currentRound + 1) + '/' + this.persons.length;
-        this._updatePills(0);
-        this.els.roundScore.textContent = '0 pkt';
+        this.els.roundScore.textContent = '—';
+        var prevTotal = this.roundScores.reduce(function(a, b) { return a + b; }, 0);
+        this.els.runningTotal.textContent = 'Suma: ' + prevTotal;
 
         this.els.personPhoto.src = person.photo;
         this.els.personPhoto.onerror = () => {
@@ -117,8 +111,12 @@ class Game {
         }
 
         this.map.showScoreOnLastPin(score);
-        this.els.roundScore.textContent = this.bestScoreThisRound + ' pkt';
-        this._updatePills(this.currentAttempt);
+        this.els.roundScore.textContent = '+' + score;
+        var newTotal = this.roundScores.reduce(function(a, b) { return a + b; }, 0) + score;
+        this.els.runningTotal.textContent = 'Suma: ' + newTotal;
+        this.els.runningTotal.classList.remove('pulse');
+        void this.els.runningTotal.offsetWidth;
+        this.els.runningTotal.classList.add('pulse');
 
         if (this.currentAttempt >= this.maxAttempts) {
             this._endRound();
@@ -173,26 +171,37 @@ class Game {
     }
 
     _renderEndScreen(scores, total, maxScore) {
-        const color = getColorFeedback(Math.round((total / maxScore) * 1000));
-        this.els.totalScore.textContent = total + ' / ' + maxScore + ' pkt';
-        this.els.totalScore.className = color;
+        var color = getColorFeedback(Math.round((total / maxScore) * 1000));
+        this.els.totalScore.textContent = total + '/' + maxScore;
+        this.els.totalScore.className = 'total-score ' + color;
+
+        // Stats row
+        var avg = scores.length ? Math.round(total / scores.length) : 0;
+        var best = scores.length ? Math.max.apply(null, scores) : 0;
+        var pct = Math.round((total / maxScore) * 100);
+        this.els.statsRow.innerHTML =
+            '<div class="stat-box"><div class="number">' + pct + '%</div><div class="label">Trafność</div></div>' +
+            '<div class="stat-box"><div class="number">' + avg + '</div><div class="label">Średnia</div></div>' +
+            '<div class="stat-box"><div class="number">' + best + '</div><div class="label">Najlepszy</div></div>';
 
         this.els.roundSummary.innerHTML = '';
-        scores.forEach((score, i) => {
-            const person = this.persons[i];
-            const row = document.createElement('div');
+        scores.forEach(function(score, i) {
+            var person = this.persons[i];
+            var c = getColorFeedback(score);
+            var barColor = c === 'green' ? '#538d4e' : c === 'yellow' ? '#b59f3b' : '#d32f2f';
+            var textColor = c === 'green' ? '#6aaa64' : c === 'yellow' ? '#b59f3b' : '#ef5350';
+            var row = document.createElement('div');
             row.className = 'summary-row';
-            const c = getColorFeedback(score);
             row.innerHTML =
+                '<div class="round-num">' + (i + 1) + '</div>' +
                 (person ? '<img src="' + person.photo + '" onerror="this.src=\'assets/placeholder.svg\'" alt="">' : '') +
-                '<div class="info">' +
-                    (person ? person.articleName : 'Runda ' + (i + 1)) +
-                '</div>' +
-                '<div class="score" style="color:' + (c === 'green' ? '#a5d6a7' : c === 'yellow' ? '#fff9c4' : '#ef9a9a') + '">' +
-                    score + '/1000' +
+                '<div class="info">' + (person ? person.articleName : 'Runda ' + (i + 1)) + '</div>' +
+                '<div style="text-align:right">' +
+                    '<div class="score" style="color:' + textColor + '">' + score + '</div>' +
+                    '<div class="score-bar"><div class="score-bar-fill" style="width:' + (score / 10) + '%;background:' + barColor + '"></div></div>' +
                 '</div>';
             this.els.roundSummary.appendChild(row);
-        });
+        }.bind(this));
 
         this.els.shareConfirm.classList.add('hidden');
         this._currentShareData = { scores, total, maxScore };

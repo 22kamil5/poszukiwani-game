@@ -44,10 +44,11 @@
     <div id="screen-round" class="screen">
         <div class="round-header">
             <div class="round-badge" id="round-counter">Runda 1/5</div>
-            <div class="attempt-pills" id="attempt-counter">
-                <span class="pill active"></span>
+            <div class="round-badge" id="attempt-counter">1 próba</div>
+            <div style="text-align:right">
+                <div class="score-display" id="round-score">0</div>
+                <div class="running-total" id="running-total">Suma: 0</div>
             </div>
-            <div class="score-display" id="round-score">0 pkt</div>
         </div>
         <div class="round-content">
             <div class="person-panel">
@@ -76,6 +77,7 @@
             <h2>Wynik końcowy</h2>
             <p id="total-score" class="total-score"></p>
         </div>
+        <div class="stats-row" id="stats-row"></div>
         <div id="round-summary"></div>
         <div class="end-actions">
             <button id="btn-share" class="btn-primary">Udostępnij wynik</button>
