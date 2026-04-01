@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Poszukiwani - Tests</title>
+    <style>
+        body { font-family: monospace; background: #111; color: #eee; padding: 1rem; }
+        .pass { color: #4caf50; }
+        .fail { color: #f44336; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Test Results</h2>
+    <div id="results"></div>
+    <script src="js/scoring.js"></script>
+    <script src="js/daily.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/share.js"></script>
+    <script>
+    (function() {
+        const results = document.getElementById('results');
+        let passed = 0, failed = 0;
+
+        function assert(name, actual, expected) {
+            const ok = JSON.stringify(actual) === JSON.stringify(expected);
+            const div = document.createElement('div');
+            if (ok) {
+                div.className = 'pass';
+                div.textContent = '✓ ' + name;
+                passed++;
+            } else {
+                div.className = 'fail';
+                div.textContent = '✗ ' + name + ' — expected ' + JSON.stringify(expected) + ', got ' + JSON.stringify(actual);
+                failed++;
+            }
+            results.appendChild(div);
+        }
+
+        // Scoring tests
+        assert('Perfect score (same point)', calculateScore(0.5, 0.5, 0.5, 0.5), 1000);
+        assert('Zero score (opposite corners)', calculateScore(0, 0, 1, 1), 0);
+        assert('Partial score near target', calculateScore(0.5, 0.5, 0.6, 0.6) > 800, true);
+        assert('Green feedback >800', getColorFeedback(900), 'green');
+        assert('Yellow feedback 400-800', getColorFeedback(500), 'yellow');
+        assert('Red feedback <400', getColorFeedback(200), 'red');
+        assert('Yellow at exact boundary 400', getColorFeedback(400), 'yellow');
+
+        // Daily puzzle tests
+        assert('Puzzle number day 1', getPuzzleNumber('2026-04-01'), 1);
+        assert('Puzzle number day 2', getPuzzleNumber('2026-04-02'), 2);
+
+        // Determinism test
+        const mock = [{id:'a'},{id:'b'},{id:'c'},{id:'d'},{id:'e'},{id:'f'}];
+        const r1 = getDailyPersons(mock, '2026-04-01');
+        const r2 = getDailyPersons(mock, '2026-04-01');
+        assert('Same date produces same persons', JSON.stringify(r1.persons), JSON.stringify(r2.persons));
+        assert('Daily persons returns 5', r1.persons.length, 5);
+        assert('Puzzle number in result', r1.puzzleNumber, 1);
+
+        const r3 = getDailyPersons(mock, '2026-04-02');
+        assert('Different date produces different order', JSON.stringify(r1.persons) !== JSON.stringify(r3.persons), true);
+
+        // Share text tests
+        const shareText = generateShareText(1, '2026-04-01', [900, 500, 200], 1600, 3000);
+        assert('Share text contains puzzle number', shareText.includes('#1'), true);
+        assert('Share text contains date', shareText.includes('2026-04-01'), true);
+        assert('Share text contains green emoji for 900', shareText.includes('🟩'), true);
+        assert('Share text contains red emoji for 200', shareText.includes('🟥'), true);
+        assert('Share text contains total', shareText.includes('1600/3000'), true);
+
+        // Summary
+        const summary = document.createElement('h3');
+        summary.textContent = passed + ' passed, ' + failed + ' failed';
+        summary.className = failed > 0 ? 'fail' : 'pass';
+        results.insertBefore(summary, results.firstChild);
+    })();
+    </script>
+</body>
+</html>
