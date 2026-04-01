@@ -54,6 +54,15 @@ class Game {
         this._showScreen('error');
     }
 
+    _updatePills(usedCount) {
+        const pills = this.els.attemptCounter.querySelectorAll('.pill');
+        pills.forEach((pill, i) => {
+            pill.className = 'pill';
+            if (i < usedCount) pill.classList.add('used');
+            else if (i === usedCount) pill.classList.add('active');
+        });
+    }
+
     _showScreen(name) {
         Object.values(this.screens).forEach(s => s.classList.remove('active'));
         this.screens[name].classList.add('active');
@@ -73,7 +82,7 @@ class Game {
         this.bestPinIndex = 0;
 
         this.els.roundCounter.textContent = 'Runda ' + (this.currentRound + 1) + '/' + this.persons.length;
-        this.els.attemptCounter.textContent = 'Próba 1/' + this.maxAttempts;
+        this._updatePills(0);
         this.els.roundScore.textContent = '0 pkt';
 
         this.els.personPhoto.src = person.photo;
@@ -81,9 +90,9 @@ class Game {
             this.els.personPhoto.src = 'assets/placeholder.svg';
         };
         this.els.personName.textContent = person.name;
-        this.els.personAge.textContent = 'Wiek: ' + (person.age || '?');
-        this.els.personGender.textContent = person.gender === 'M' ? 'Mężczyzna' : 'Kobieta';
-        this.els.personRegion.textContent = person.region;
+        this.els.personAge.innerHTML = '<span class="label">Wiek:</span> <span class="value">' + (person.age || '?') + '</span>';
+        this.els.personGender.innerHTML = '<span class="label">Płeć:</span> <span class="value">' + (person.gender === 'M' ? 'Mężczyzna' : 'Kobieta') + '</span>';
+        this.els.personRegion.innerHTML = '<span class="label">Region:</span> <span class="value">' + person.region + '</span>';
 
         this.els.feedback.classList.add('hidden');
         this.els.feedback.className = 'feedback hidden';
@@ -109,7 +118,7 @@ class Game {
 
         this.map.showScoreOnLastPin(score);
         this.els.roundScore.textContent = this.bestScoreThisRound + ' pkt';
-        this.els.attemptCounter.textContent = 'Próba ' + Math.min(this.currentAttempt + 1, this.maxAttempts) + '/' + this.maxAttempts;
+        this._updatePills(this.currentAttempt);
 
         if (this.currentAttempt >= this.maxAttempts) {
             this._endRound();
