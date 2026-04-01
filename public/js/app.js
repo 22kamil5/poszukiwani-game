@@ -3,6 +3,7 @@ class Game {
         this.puzzleNumber = dailyData.puzzleNumber;
         this.dateString = dailyData.dateString;
         this.persons = dailyData.persons;
+        this.allPersons = dailyData.allPersons || dailyData.persons;
         this.currentRound = 0;
         this.maxAttempts = 1;
         this.currentAttempt = 0;
@@ -49,6 +50,7 @@ class Game {
         this.els.btnPlay.addEventListener('click', () => this.start());
         this.els.btnNext.addEventListener('click', () => this._nextRound());
         this.els.btnShare.addEventListener('click', () => this._share());
+        this.els.btnReplay.addEventListener('click', () => this._replay());
     }
 
     showError(message) {
@@ -214,5 +216,13 @@ class Game {
             this.els.shareConfirm.classList.remove('hidden');
             setTimeout(() => this.els.shareConfirm.classList.add('hidden'), 2000);
         });
+    }
+
+    _replay() {
+        var rng = mulberry32(Date.now());
+        var shuffled = seededShuffle(this.allPersons, rng);
+        this.persons = shuffled.slice(0, Math.min(5, shuffled.length));
+        this.map = null;
+        this.start();
     }
 }

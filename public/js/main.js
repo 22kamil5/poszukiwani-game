@@ -14,13 +14,11 @@
             const game = new Game({
                 puzzleNumber: daily.puzzleNumber,
                 dateString: today,
-                persons: daily.persons
+                persons: daily.persons,
+                allPersons: withPhotos
             });
 
-            const saved = loadDailyResult(today);
-            if (saved && saved.completed) {
-                game.showSavedResult(saved);
-            }
+            // No localStorage block — allow replaying
         })
         .catch(function (err) {
             document.getElementById('screen-start').classList.remove('active');
