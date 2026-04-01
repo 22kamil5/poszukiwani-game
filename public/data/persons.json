@@ -1,0 +1,8 @@
+[
+    { "id": "1", "name": "Jan K.", "age": 35, "gender": "M", "region": "KWP Warszawa", "photo": "assets/placeholder.svg", "article": "Art. 286 § 1", "articleName": "Oszustwo", "category": "oszustwa", "mapX": 0.80, "mapY": 0.72 },
+    { "id": "2", "name": "Anna W.", "age": 28, "gender": "K", "region": "KWP Kraków", "photo": "assets/placeholder.svg", "article": "Art. 148 § 1", "articleName": "Zabójstwo", "category": "przeciwko_zyciu", "mapX": 0.15, "mapY": 0.92 },
+    { "id": "3", "name": "Marek Z.", "age": 42, "gender": "M", "region": "KWP Gdańsk", "photo": "assets/placeholder.svg", "article": "Art. 62 ust. 2 ustawy o przeciwdziałaniu narkomanii", "articleName": "Posiadanie znacznej ilości narkotyków", "category": "narkotyki", "mapX": 0.46, "mapY": 0.72 },
+    { "id": "4", "name": "Tomasz L.", "age": 31, "gender": "M", "region": "KWP Wrocław", "photo": "assets/placeholder.svg", "article": "Art. 280 § 1", "articleName": "Rozbój", "category": "przemoc", "mapX": 0.15, "mapY": 0.58 },
+    { "id": "5", "name": "Ewa P.", "age": 39, "gender": "K", "region": "KWP Katowice", "photo": "assets/placeholder.svg", "article": "Art. 270 § 1", "articleName": "Fałszerstwo dokumentów", "category": "oszustwa", "mapX": 0.75, "mapY": 0.68 },
+    { "id": "6", "name": "Piotr S.", "age": 45, "gender": "M", "region": "KWP Poznań", "photo": "assets/placeholder.svg", "article": "Art. 258 § 1", "articleName": "Udział w zorganizowanej grupie przestępczej", "category": "przeciwko_panstwu", "mapX": 0.50, "mapY": 0.65 }
+]
